@@ -1735,20 +1735,25 @@ app.registerExtension({
 
       // 把json往里 拖
       document.addEventListener('drop', async event => {
-        event.preventDefault()
-        event.stopPropagation()
+        if (!event.dataTransfer.files.length) return
 
-        // Dragging from Chrome->Firefox there is a file but its a bmp, so ignore that
-        if (
-          event.dataTransfer.files.length &&
-          event.dataTransfer.files[0].type == 'application/json'
-        ) {
-          const reader = new FileReader()
-          reader.onload = async () => {
-            loadAppJson(reader.result)
-          }
-          reader.readAsText(event.dataTransfer.files[0])
+        const file = event.dataTransfer.files[0]
+        // 兼容 Windows 上 .json 文件 MIME type 为空的情况
+        if (file.type !== 'application/json' && !file.name.endsWith('.json')) return
+
+        const reader = new FileReader()
+        reader.onload = async () => {
+          // 只有 mixlab app 格式的 JSON 才拦截处理，其余放行给 ComfyUI
+          try {
+            let w = JSON.parse(reader.result)
+            if (w.app && w.output && w.workflow) {
+              event.preventDefault()
+              event.stopPropagation()
+              await app.loadGraphData(w.workflow)
+            }
+          } catch (err) {}
         }
+        reader.readAsText(file)
       })
     }
 
