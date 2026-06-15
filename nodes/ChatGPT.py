@@ -306,7 +306,10 @@ class ChatGPTNode:
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-16k",
             "gpt-4o",
+            "gpt-4o-mini",
             "gpt-4o-2024-05-13",
+            "gpt-5-mini",
+            "omni-moderation-latest",
             "gpt-4",
             "gpt-4-0314",
             "gpt-4-0613",
@@ -849,7 +852,10 @@ class SimulateDevDesignDiscussions:
 
         model_list=[ 
             "gpt-4o",
+            "gpt-4o-mini",
             "gpt-4o-2024-05-13",
+            "gpt-5-mini",
+            "omni-moderation-latest",
             "gpt-4",
             "gpt-4-0314",
             "gpt-4-0613",
