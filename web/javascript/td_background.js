@@ -8,7 +8,18 @@ window._bg_img = null
  **/
 
 // 判断是否是新版的，LGraphCanvas.prototype.drawBackCanvas.toString().match('window.devicePixelRatio')
-let scale=LGraphCanvas.prototype.drawBackCanvas.toString().match('window.devicePixelRatio')?window.devicePixelRatio:1;
+// Legacy detection only: frontends before 1.54.13 / 1.55.14 read window.devicePixelRatio
+// inside drawBackCanvas. Newer frontends cache it on the canvas as `this.dpr` instead.
+const nativeUsesDevicePixelRatio = !!LGraphCanvas.prototype.drawBackCanvas
+  .toString()
+  .match('window.devicePixelRatio')
+
+// Must match the scale the frontend applied to the canvas backing store, otherwise
+// links/groups are drawn at a different scale than nodes on HiDPI displays.
+function getBackCanvasScale (canvas) {
+  if (typeof canvas.dpr === 'number' && canvas.dpr > 0) return canvas.dpr
+  return nativeUsesDevicePixelRatio ? window.devicePixelRatio || 1 : 1
+}
 
 LGraphCanvas.prototype.drawBackCanvas = function () {
   var canvas = this.bgcanvas
@@ -62,6 +73,7 @@ LGraphCanvas.prototype.drawBackCanvas = function () {
 
   //reset in case of error
   if (!this.viewport) {
+    const scale = getBackCanvasScale(this)
     ctx.restore()
     // ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.setTransform(scale, 0, 0, scale, 0, 0)
